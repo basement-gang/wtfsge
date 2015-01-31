@@ -64,18 +64,18 @@ class GatheringHandler(RequestHandler):
         #g = Gathering.gathering_from_json(gjson_str)
         #self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
         self.render("gathering.html",
-				friends={
-					'mofo': [1.3577393, 103.7683112],
-					'gofo': [1.4577393, 103.8683112],
-					'lofo': [1.2577393, 103.7683112],
-					'sofo': [1.3577393, 103.6683112],
-				},
-				recommendations = [
-					'hehheh'
-				],
-				selected_rec = 0
-			)
-		"""
+            friends={
+               'mofo': [1.3577393, 103.7683112],
+               'gofo': [1.4577393, 103.8683112],
+               'lofo': [1.2577393, 103.7683112],
+               'sofo': [1.3577393, 103.6683112],
+            },
+            recommendations = [
+               'hehheh'
+            ],
+            selected_rec = 0
+         )
+      """
         gid = str(gathering_id)
         gjson_str = self.db.get(gid)
 
@@ -85,7 +85,7 @@ class GatheringHandler(RequestHandler):
         g = Gathering.gathering_from_json(gjson_str)
 
         self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
-		"""
+      """
 
     def on_finish(self):
         self.db.close()
