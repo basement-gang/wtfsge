@@ -13,11 +13,11 @@ class Gathering(object):
         self.selected_rec = None
 
     def add_friend(self, loc):
-        """Takes in the location of a new friend, and returns the id of the new friend
+        """
+        Takes in the location of a new friend, and returns the id of the new friend
         Loc should be of type list [lat, lng]
         """
-        id = uuid.uuid5(self.id, str(loc))
-        id = str(id)
+        id = str(uuid.uuid4())
         self.friends[id] = loc
 
         return id
@@ -94,13 +94,13 @@ class GatheringHandler(RequestHandler):
         gjson = self.db.get(str(gathering_id))
         g = Gathering.gathering_from_json(gjson)
 
-        if not self.get_secure_cookie("user_id"):
+        if not self.get_secure_cookie("friend_id"):
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
             friend_id = g.add_friend([lat, lng])
-            self.db.put(g.id, g)
-            self.set_secure_cookie("user_id", friend_id)
+            self.db.put(g.id,json.dumps(g.__dict__))
+            self.set_secure_cookie("friend_id", friend_id)
 
-        self.write(g.to_dict)
+        self.write(g.to_dict())
 
     def on_finish(self):
         self.db.close()
