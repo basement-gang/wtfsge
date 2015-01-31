@@ -113,4 +113,5 @@ def main():
     IOLoop.current().start()
 
 if __name__ == '__main__':
+    print "Go to http://localhost:4000 on your browser..."
     main()
