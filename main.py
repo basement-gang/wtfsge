@@ -90,6 +90,11 @@ class GatheringHandler(RequestHandler):
     def on_finish(self):
         self.db.close()
 
+class NotFoundHandler(RequestHandler):
+    def prepare(self):
+        self.set_status(404)
+        self.render("404.html")
+
 def make_app():
     return Application([
         url(r"/", HomeHandler),
@@ -99,7 +104,8 @@ def make_app():
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
         static_path=os.path.join(os.path.dirname(__file__), "static"),
-                        )
+        default_handler_class=NotFoundHandler,
+            )
 
 def main():
     app = make_app()
