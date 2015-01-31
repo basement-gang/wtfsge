@@ -3,7 +3,7 @@ import uuid
 import plyvel
 import simplejson as json
 from tornado.ioloop import IOLoop
-from tornado.web import RequestHandler, Application, url, StaticFileHandler
+from tornado.web import RequestHandler, Application, url, StaticFileHandler, HTTPError
 
 class Gathering(object):
     def __init__(self):
@@ -14,7 +14,7 @@ class Gathering(object):
 
     def add_friend(self, loc):
         """Takes in the location of a new friend, and returns the id of the new friend
-        Loc should be of type tuple
+        Loc should be of type list [lat, lng]
         """
         id = uuid.uuid5(self.id, str(loc))
         id = str(id)
@@ -60,7 +60,12 @@ class GatheringHandler(RequestHandler):
         self.db = plyvel.DB('db', create_if_missing=True)
 
     def get(self, gathering_id):
-        gjson_str = self.db.get(gathering_id)
+        gid = str(gathering_id)
+        gjson_str = self.db.get(gid)
+
+        if gjson_str is None:
+            raise HTTPError(404)
+
         g = Gathering.gathering_from_json(gjson_str)
 
         self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
@@ -71,8 +76,7 @@ class GatheringHandler(RequestHandler):
 def make_app():
     return Application([
         url(r"/", HomeHandler),
-        url(r"/gathering", GatheringNewHandler),
-        # url(r"/gathering/
+        url(r"/gathering", GatheringNewHandler, name="newgathering"),
         url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
         url(r"/static", StaticFileHandler)
             ],
