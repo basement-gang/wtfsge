@@ -17,7 +17,7 @@ var map;
 function initialize() {
 	console.log("whatever");
 	var mapOptions = {
-		zoom: 6
+		zoom: 20
 	};
 	map = new google.maps.Map(document.getElementById('map-canvas'),
 			mapOptions);
@@ -37,7 +37,6 @@ function initialize() {
 			});
 
 			map.setCenter(pos);
-			map.setZoom(20);
 		}, function() {
 			handleNoGeolocation(true);
 		});
