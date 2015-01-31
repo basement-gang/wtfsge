@@ -3,16 +3,13 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-
-<div class="starter-template">
-	<h1>Eat / Wtf / Sg</h1>
-	<div id="map-canvas" style="height:500px"></div>
-	<input class='btn btn-default btn-lg' type="submit" value="Update Location" id="update-btn"/>
-</div>
+<div id="map-canvas" style="width: 100%; height: 100%"></div>
+<button class='btn btn-default btn-lg' value="Update Location" id="update-btn"/>
 
 <script>
 var map;
-
+var markers = {};
+var infowindow = null;
 function renderGathering(gathering) {
 	var friends = gathering.friends;
 	var recommendations = gathering.recommendations;
@@ -27,19 +24,30 @@ function renderGathering(gathering) {
 	}
 	
 	for (var k in friends) {
-		var marker = new google.maps.Marker({
-			position: new google.maps.LatLng(friends[k][0],friends[k][1]),
-			map: map
-		});
-		bounds.extend(marker.position);
+		var position = new google.maps.LatLng(friends[k][0],friends[k][1]);
+
+		if (k in markers) {
+			markers[k].setPosition(position);
+		}
+		else {
+			markers[k] = new google.maps.Marker({
+				position: position,
+				map: map
+			});
+		}
+
+		bounds.extend(markers[k].position);
 	}
-	var infowindow = new google.maps.InfoWindow({
-		map: map,
-		position: new google.maps.LatLng(gathering.centroid[0],gathering.centroid[1]),
-		content: 'CENTRE'
-	});
+	centrePos = new google.maps.LatLng(gathering.centroid[0],gathering.centroid[1]);
+	if (infowindow == null) { 
+		infowindow = new google.maps.InfoWindow({
+			map: map,
+			position: centrePos,
+			content: 'CENTRE'
+		});
+	}
+	infowindow.setPosition(centrePos);
 	map.fitBounds(bounds)
-	console.log(document.getElementById('map-canvas'))
 }
 
 function handleNoGeolocation(errorFlag) {
@@ -65,8 +73,21 @@ function updateLocation() {
 
 $('#update-btn').click(updateLocation);
 
+function doPoll() {
+	$.ajax({
+		url: window.location.pathname + '/data',
+		data: {},
+		ifModified: true,
+		success: function(gathering) {
+			if (gathering) {
+				renderGathering(gathering);
+			}
+			setTimeout(doPoll,10000);
+		},
+	});
+}
 updateLocation();
-
+doPoll();
 </script>
 
 {% end %}
