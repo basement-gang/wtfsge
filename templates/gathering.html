@@ -9,9 +9,9 @@
 	<div id="map-canvas" style="height:500px"></div>
 </div>
 <script>
-var friends = {{ json_encode(friends) }};
-var recommendations = {{ json_encode(recommendations) }};
-var selected_rec = {{ json_encode(selected_rec) }}
+var friends = {% raw friends %};
+var recommendations = {% raw recommendations %};
+var selected_rec = {{ selected_rec }};
 
 // Note: This example requires that you consent to location sharing when
 // prompted by your browser. If you see a blank space instead of the map, this
@@ -20,12 +20,25 @@ var selected_rec = {{ json_encode(selected_rec) }}
 var map;
 
 function initialize() {
-	console.log("whatever");
 	var mapOptions = {
-		zoom: 20
+		zoom: 100,
 	};
+	var bounds = new google.maps.LatLngBounds();
+	var infowindow = new google.maps.InfoWindow();
+
 	map = new google.maps.Map(document.getElementById('map-canvas'),
 			mapOptions);
+	
+	for (var k in friends) {
+		var marker = new google.maps.Marker({
+			position: new google.maps.LatLng(friends[k][0],friends[k][1]),
+			map: map
+		});
+
+		bounds.extend(marker.position);
+	}
+
+	map.fitBounds(bounds)
 
 	console.log(document.getElementById('map-canvas'))
 
