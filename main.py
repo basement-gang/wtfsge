@@ -63,32 +63,7 @@ class GatheringHandler(RequestHandler):
         self.db = plyvel.DB('db', create_if_missing=True)
 
     def get(self, gathering_id):
-        #gjson_str = self.db.get(gathering_id)
-        #g = Gathering.gathering_from_json(gjson_str)
-        #self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
-        self.render("gathering.html",
-            friends = json.dumps({
-               'mofo': [1.3577393, 103.7683112],
-               'gofo': [1.3567393, 103.7673112],
-               'lofo': [1.3587393, 103.7683112],
-               'sofo': [1.3577393, 103.7693112],
-            }),
-            recommendations = json.dumps([
-               'hehheh'
-            ]),
-            selected_rec = 0
-         )
-        """
-        gid = str(gathering_id)
-        gjson_str = self.db.get(gid)
-
-        if gjson_str is None:
-            raise HTTPError(404)
-
-        g = Gathering.gathering_from_json(gjson_str)
-
-        self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
-        """
+        self.render("gathering.html")
 
     def post(self, gathering_id):
         gjson = self.db.get(str(gathering_id))
