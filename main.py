@@ -21,7 +21,7 @@ class Gathering(object):
         self.friends[id] = loc
         return id
 
-    def update_friend(self,id,loc):
+    def update_friend(self, id, loc):
         self.friends[id] = loc
 
     def del_friend(self, id):
@@ -53,7 +53,7 @@ class GatheringNewHandler(RequestHandler):
 
     def post(self):
         g = Gathering()
-        self.db.put(g.id, json.dumps(g.__dict__))
+        self.db.put(g.id, json.dumps(g.to_dict()))
 
         self.redirect("/gathering/" + g.id)
 
@@ -65,16 +65,20 @@ class GatheringHandler(RequestHandler):
         self.db = plyvel.DB('db', create_if_missing=True)
 
     def get(self, gathering_id):
+        gjson = self.db.get(str(gathering_id))
+        if not gjson:
+            raise HTTPError(404)
+
         self.render("gathering.html")
 
     def post(self, gathering_id):
         gjson = self.db.get(str(gathering_id))
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
-        if not friend_id or ( friend_id not in g.friends ):
+        if not friend_id or (friend_id not in g.friends):
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
             friend_id = g.add_friend([lat, lng])
-            self.db.put(g.id,json.dumps(g.__dict__))
+            self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
 
         self.write(g.to_dict())
@@ -82,6 +86,22 @@ class GatheringHandler(RequestHandler):
     def on_finish(self):
         self.db.close()
 
+class GatheringPollHandler(RequestHandler):
+    def initialize(self):
+        self.db = plyvel.DB('db', create_if_missing=True)
+
+    def get(self, gathering_id):
+        """If the request provides an etag header, this *should* return a 304 automagically
+        if the etag headers match."""
+        gjson = self.db.get(str(gathering_id))
+        if not gjson:
+            raise HTTPError(404)
+
+        g = Gathering.gathering_from_json(gjson)
+        self.write(g.to_dict())
+
+    def on_finish(self):
+        self.db.close()
 
 class NotFoundHandler(RequestHandler):
     def prepare(self):
@@ -93,6 +113,7 @@ def make_app():
         url(r"/", HomeHandler),
         url(r"/gathering/new", GatheringNewHandler, name="newgathering"),
         url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
+        url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/poll", GatheringPollHandler),
         url(r"/static", StaticFileHandler)
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
