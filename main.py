@@ -1,14 +1,63 @@
 import os
+import uuid
+import plyvel
+import simplejson as json
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, StaticFileHandler
+
+class Gathering(object):
+    def __init__(self):
+        self.id = str(uuid.uuid4())
+        self.friends = {}
+        self.recommendations = []
+        self.selected_rec = None
+
+    def add_friend(self, loc):
+        """Takes in the location of a new friend, and returns the id of the new friend
+        Loc should be of type tuple
+        """
+        id = uuid.uuid5(self.id, str(loc))
+        id = str(id)
+        self.friends[id] = loc
+
+        return id
+
+    def del_friend(self, id):
+        if id in self.friends:
+            del self.friends[id]
+
+    @classmethod
+    def gathering_from_json(cls, jsonstr):
+        g = Gathering()
+        gdict = json.decode(jsonstr)
+
+        g.id = gdict['id']
+        g.friends = gdict['friends']
+        g.recommendations = gdict['recommendations']
+        g.selected_rec = gdict['selected_rec']
+
+        return g
 
 class HomeHandler(RequestHandler):
     def get(self):
         self.render("main.html")
 
+class GatheringNewHandler(RequestHandler):
+    def initialize(self):
+        self.db = plyvel.DB('db', create_if_missing=True)
+
+    def post(self):
+        g = Gathering()
+        self.db.put(g.id, json.dumps(g.__dict__))
+
+        self.redirect("/gathering/" + g.id)
+
+
 def make_app():
     return Application([
         url(r"/", HomeHandler),
+        url(r"/gathering", GatheringNewHandler),
+        # url(r"/gathering/
         url(r"/static", StaticFileHandler)
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
