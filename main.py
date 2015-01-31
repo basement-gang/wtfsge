@@ -29,7 +29,7 @@ class Gathering(object):
     @classmethod
     def gathering_from_json(cls, jsonstr):
         g = Gathering()
-        gdict = json.decode(jsonstr)
+        gdict = json.loads(jsonstr)
 
         g.id = gdict['id']
         g.friends = gdict['friends']
