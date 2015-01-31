@@ -26,6 +26,9 @@ class Gathering(object):
         if id in self.friends:
             del self.friends[id]
 
+    def to_dict(self):
+        return self.__dict__
+
     @classmethod
     def gathering_from_json(cls, jsonstr):
         g = Gathering()
@@ -87,8 +90,21 @@ class GatheringHandler(RequestHandler):
         self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
         """
 
+    def post(self, gathering_id):
+        gjson = self.db.get(str(gathering_id))
+        g = Gathering.gathering_from_json(gjson)
+
+        if not self.get_secure_cookie("user_id"):
+            lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
+            friend_id = g.add_friend([lat, lng])
+            self.db.put(g.id, g)
+            self.set_secure_cookie("user_id", friend_id)
+
+        self.write(g.to_dict)
+
     def on_finish(self):
         self.db.close()
+
 
 class NotFoundHandler(RequestHandler):
     def prepare(self):
@@ -98,13 +114,15 @@ class NotFoundHandler(RequestHandler):
 def make_app():
     return Application([
         url(r"/", HomeHandler),
-        url(r"/gathering", GatheringNewHandler, name="newgathering"),
+        url(r"/gathering/new", GatheringNewHandler, name="newgathering"),
         url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
         url(r"/static", StaticFileHandler)
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
         static_path=os.path.join(os.path.dirname(__file__), "static"),
         default_handler_class=NotFoundHandler,
+        # Insecure because public repo
+        cookie_secret=":A@[&%p<y~NQ^*e[T7ArS%(u^|TYf^1YB|cl*_$cG-U_X{5{L1&!n><mC)t8kh%.",
             )
 
 def main():
