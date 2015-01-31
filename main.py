@@ -25,17 +25,16 @@ class Gathering(object):
         self.selected_rec = None
         self.centroid = None
 
-    def add_friend(self,loc):
+    def add_friend(self, loc):
         """
         Takes in the location of a new friend, and returns the id of the new friend
         Loc should be of type list [lat, lng]
         """
         friend_id = str(uuid.uuid4())
         self.friends[friend_id] = loc
-        self.centroid = centrepoint([ [float(lat),float(lng)] for lat,lng in self.friends.values() ])
+        self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
         print self.centroid
         return friend_id
-
 
     def del_friend(self, id):
         if id in self.friends:
@@ -69,7 +68,7 @@ class GatheringNewHandler(RequestHandler):
         g = Gathering()
         self.db.put(g.id, json.dumps(g.to_dict()))
 
-        self.redirect("/gathering/" + g.id)
+        self.redirect("/gatherings/" + g.id)
 
     def on_finish(self):
         self.db.close()
@@ -121,6 +120,10 @@ class GatheringHandler(RequestHandler):
         self.db.close()
 
 class GatheringPollHandler(RequestHandler):
+    """Endpoint for longpolling to hit, to constantly get updated
+    Gathering data. Should return 302 when provided with an If-Not-Match
+    etag header that matches.
+    """
     def initialize(self):
         self.db = plyvel.DB('db', create_if_missing=True)
 
@@ -137,6 +140,26 @@ class GatheringPollHandler(RequestHandler):
     def on_finish(self):
         self.db.close()
 
+class FriendHandler(RequestHandler):
+    def initialize(self):
+        self.db = plyvel.DB('db', create_if_missing=True)
+
+    def delete(self, gathering_id, friend_id):
+        """Delete a friend.
+        """
+        gjson = self.db.get(str(gathering_id))
+        if not gjson:
+            raise HTTPError(404)
+        g = Gathering.gathering_from_json(gjson)
+        g.del_friend(friend_id)
+        self.db.put(g.id, json.dumps(g.to_dict()))
+
+        self.set_header(200)
+        self.write('')
+
+    def on_finish(self):
+        self.db.close()
+
 class NotFoundHandler(RequestHandler):
     def prepare(self):
         self.set_status(404)
@@ -145,9 +168,10 @@ class NotFoundHandler(RequestHandler):
 def make_app():
     return Application([
         url(r"/", HomeHandler),
-        url(r"/gathering/new", GatheringNewHandler, name="newgathering"),
-        url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
-        url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/poll", GatheringPollHandler),
+        url(r"/gatherings/", GatheringNewHandler, name="newgathering"),
+        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
+        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/data", GatheringPollHandler),
+        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/friends/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", FriendHandler),
         url(r"/static", StaticFileHandler)
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
