@@ -52,12 +52,28 @@ class GatheringNewHandler(RequestHandler):
 
         self.redirect("/gathering/" + g.id)
 
+    def on_finish(self):
+        self.db.close()
+
+class GatheringHandler(RequestHandler):
+    def initialize(self):
+        self.db = plyvel.DB('db', create_if_missing=True)
+
+    def get(self, gathering_id):
+        gjson_str = self.db.get(gathering_id)
+        g = Gathering.gathering_from_json(gjson_str)
+
+        self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
+
+    def on_finish(self):
+        self.db.close()
 
 def make_app():
     return Application([
         url(r"/", HomeHandler),
         url(r"/gathering", GatheringNewHandler),
         # url(r"/gathering/
+        url(r"/gathering/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
         url(r"/static", StaticFileHandler)
             ],
         template_path=os.path.join(os.path.dirname(__file__), "templates"),
