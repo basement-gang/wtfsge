@@ -8,5 +8,6 @@ uncontrollably when Node is mentioned.
 
 ## Setup
 1. Clone the fucking repo.
-2. Install the fucking requirements `pip install -r requirements.txt`
-3. `python main.py`
+2. Install `leveldb` by running `brew install leveldb`
+3. Install the fucking requirements `pip install -r requirements.txt`
+4. `python main.py`
