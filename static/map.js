@@ -40,3 +40,13 @@ function SetCenter(lat, lng) {
 	var myLatLng = new google.maps.LatLng(lat, lng);
 	map.SetCenter(myLatLng)
 }
+function GetLatLngFromPostalCode(postalCode){
+	geocoder = new google.maps.Geocoder();
+	geocoder.geocode( {'address' : postalCode}, function (results, status) { 
+		if (status == google.maps.GeocoderStatus.OK) { 		
+			return results[0].geometry.location;
+		} else{ 
+			return null;
+		}
+	});
+}
