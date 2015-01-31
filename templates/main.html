@@ -1,71 +1,11 @@
-<html lang="en"><head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="">
-<meta name="author" content="">
-<link rel="icon" href="../../favicon.ico">
+{% extends "base.html" %}
 
-<title>Eat / wtf / sg</title>
+{% block title %}Create Gathering{% end %}
 
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-
-<!-- Optional theme -->
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-
-<!-- Google Maps API -->
-<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
-
-<!-- Our theme -->
-<link rel="stylesheet" href="template.css"></script>
-
-<!-- Our js -->
-<script src="template.js"></script>
-
-</head>
-
-<body onload="init();">
-
-	<nav class="navbar navbar-inverse navbar-fixed-top">
-		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">Eat</a>
-			</div>
-			<div id="navbar" class="collapse navbar-collapse">
-				<ul class="nav navbar-nav">
-					<li class="active"><a href="#">Home</a></li>
-					<li><a href="#about">About</a></li>
-					<li><a href="#contact">Contact</a></li>
-				</ul>
-			</div><!--/.nav-collapse -->
-		</div>
-	</nav>
-
-	<div class="container">
-
-		<div class="starter-template">
-			<h1>Eat / Wtf / Sg</h1>
-			<p class="lead">Insert map and controls here</p>
-			<div id="map">Google Maps should be here. 
-				If you're seeing this, you probably don't have internet connection :(</div>
-			</div>
-
-		</div><!-- /.container -->
-
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-
-</body></html>
+{% block body %}
+<div class="starter-template">
+  <h1>Eat / Wtf / Sg</h1>
+  <p class="lead">Insert map and controls here</p>
+  <button>Create Gathering</button>
+</div>
+{% end %}
