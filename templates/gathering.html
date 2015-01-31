@@ -3,11 +3,16 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
+
 <div class="starter-template">
 	<h1>Eat / Wtf / Sg</h1>
 	<div id="map-canvas" style="height:500px"></div>
 </div>
 <script>
+var friends = {{ json_encode(friends) }};
+var recommendations = {{ json_encode(recommendations) }};
+var selected_rec = {{ json_encode(selected_rec) }}
+
 // Note: This example requires that you consent to location sharing when
 // prompted by your browser. If you see a blank space instead of the map, this
 // is probably because you have denied permission for location sharing.

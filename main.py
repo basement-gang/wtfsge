@@ -75,7 +75,7 @@ class GatheringHandler(RequestHandler):
             ],
             selected_rec = 0
          )
-      """
+        """
         gid = str(gathering_id)
         gjson_str = self.db.get(gid)
 
@@ -85,7 +85,7 @@ class GatheringHandler(RequestHandler):
         g = Gathering.gathering_from_json(gjson_str)
 
         self.render("gathering.html", friends=g.friends, recommendations=g.recommendations, selected_rec=g.selected_rec)
-      """
+        """
 
     def on_finish(self):
         self.db.close()
