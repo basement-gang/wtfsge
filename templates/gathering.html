@@ -7,6 +7,7 @@
 <div class="starter-template">
 	<h1>Eat / Wtf / Sg</h1>
 	<div id="map-canvas" style="height:500px"></div>
+	<input class='btn btn-default btn-lg' type="submit" value="Update Location" id="update-btn"/>
 </div>
 
 <script>
@@ -21,55 +22,50 @@ function renderGathering(gathering) {
 		zoom: 100,
 	};
 	var bounds = new google.maps.LatLngBounds();
-	map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+	if (!map) {
+		map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+	}
 	
 	for (var k in friends) {
 		var marker = new google.maps.Marker({
 			position: new google.maps.LatLng(friends[k][0],friends[k][1]),
 			map: map
 		});
-
 		bounds.extend(marker.position);
 	}
-
+	var infowindow = new google.maps.InfoWindow({
+		map: map,
+		position: new google.maps.LatLng(gathering.centroid[0],gathering.centroid[1]),
+		content: 'CENTRE'
+	});
 	map.fitBounds(bounds)
 	console.log(document.getElementById('map-canvas'))
 }
 
 function handleNoGeolocation(errorFlag) {
-	if (errorFlag) {
-		var content = 'Error: The Geolocation service failed.';
-	} else {
-		var content = 'Error: Your browser doesn\'t support geolocation.';
-	}
-
-	var options = {
-		map: map,
-		position: new google.maps.LatLng(60, 105),
-		content: content
-	};
-
-	var infowindow = new google.maps.InfoWindow(options);
-	map.setCenter(options.position);
 }
 
-if(navigator.geolocation) {
-	console.log("hi");
-	navigator.geolocation.getCurrentPosition(function(position) {
-		console.log("posting geo ocation");
-		$.post(window.location.pathname, {
-			lat: position.coords.latitude,
-			lng: position.coords.longitude
-		},function(gathering) {
-			renderGathering(gathering);
+function updateLocation() {
+	if(navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			$.post(window.location.pathname, {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			},function(gathering) {
+				renderGathering(gathering);
+			});
+		}, function() {
+			handleNoGeolocation(true);
 		});
-	}, function() {
-		handleNoGeolocation(true);
-	});
-} else {
-	handleNoGeolocation(false);
+	}
+	else {
+		handleNoGeolocation(false);
+	}
 }
 
+$('#update-btn').click(updateLocation);
+
+updateLocation();
 
 </script>
 

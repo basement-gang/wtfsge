@@ -4,6 +4,18 @@ import plyvel
 import simplejson as json
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, StaticFileHandler, HTTPError
+import math
+
+def centrepoint(coordinates):
+    coordinates = [ map(math.radians,c) for c in coordinates ]
+    points = len(coordinates)
+    mean_x = sum(math.cos(lat) * math.cos(lng) for lat,lng in coordinates)/points
+    mean_y = sum(math.cos(lat) * math.sin(lng) for lat,lng in coordinates)/points
+    mean_z = sum(math.sin(lat)                 for lat,_   in coordinates)/points
+    lng = math.atan2(mean_y,mean_x)
+    hyp = math.sqrt(mean_x**2 + mean_y**2)
+    lat = math.atan2(mean_z,hyp)
+    return [math.degrees(lat),math.degrees(lng)]
 
 class Gathering(object):
     def __init__(self):
@@ -11,18 +23,20 @@ class Gathering(object):
         self.friends = {}
         self.recommendations = []
         self.selected_rec = None
+        self.centroid = None
 
-    def add_friend(self, loc):
+    def add_friend(self,friend_id,loc):
         """
         Takes in the location of a new friend, and returns the id of the new friend
         Loc should be of type list [lat, lng]
         """
-        id = str(uuid.uuid4())
-        self.friends[id] = loc
-        return id
+        if friend_id == None:
+            friend_id = str(uuid.uuid4())
+        self.friends[friend_id] = loc
+        self.centroid = centrepoint([ [float(lat),float(lng)] for lat,lng in self.friends.values() ])
+        print self.centroid
+        return friend_id
 
-    def update_friend(self,id,loc):
-        self.friends[id] = loc
 
     def del_friend(self, id):
         if id in self.friends:
@@ -40,6 +54,7 @@ class Gathering(object):
         g.friends = gdict['friends']
         g.recommendations = gdict['recommendations']
         g.selected_rec = gdict['selected_rec']
+        g.centroid = gdict['centroid']
 
         return g
 
@@ -73,10 +88,9 @@ class GatheringHandler(RequestHandler):
         friend_id = self.get_secure_cookie("friend_id")
         if not friend_id or ( friend_id not in g.friends ):
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
-            friend_id = g.add_friend([lat, lng])
+            friend_id = g.add_friend(friend_id,[lat, lng])
             self.db.put(g.id,json.dumps(g.__dict__))
             self.set_secure_cookie("friend_id", friend_id)
-
         self.write(g.to_dict())
 
     def on_finish(self):
