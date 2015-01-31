@@ -8,12 +8,11 @@
 	<h1>Eat / Wtf / Sg</h1>
 	<div id="map-canvas" style="height:500px"></div>
 </div>
-<script>
 
+<script>
 var map;
 
 function renderGathering(gathering) {
-	console.log(gathering);
 	var friends = gathering.friends;
 	var recommendations = gathering.recommendations;
 	var selected_rec = gathering.selected_rec;
@@ -22,8 +21,7 @@ function renderGathering(gathering) {
 		zoom: 100,
 	};
 	var bounds = new google.maps.LatLngBounds();
-	map = new google.maps.Map(document.getElementById('map-canvas'),
-		mapOptions);
+	map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
 	
 	for (var k in friends) {
 		var marker = new google.maps.Marker({
@@ -56,7 +54,9 @@ function handleNoGeolocation(errorFlag) {
 }
 
 if(navigator.geolocation) {
+	console.log("hi");
 	navigator.geolocation.getCurrentPosition(function(position) {
+		console.log("posting geo ocation");
 		$.post(window.location.pathname, {
 			lat: position.coords.latitude,
 			lng: position.coords.longitude
