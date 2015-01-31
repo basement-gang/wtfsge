@@ -7,15 +7,15 @@ from tornado.web import RequestHandler, Application, url, StaticFileHandler, HTT
 import math
 
 def centrepoint(coordinates):
-    coordinates = [ map(math.radians,c) for c in coordinates ]
+    coordinates = [map(math.radians, c) for c in coordinates]
     points = len(coordinates)
-    mean_x = sum(math.cos(lat) * math.cos(lng) for lat,lng in coordinates)/points
-    mean_y = sum(math.cos(lat) * math.sin(lng) for lat,lng in coordinates)/points
-    mean_z = sum(math.sin(lat)                 for lat,_   in coordinates)/points
-    lng = math.atan2(mean_y,mean_x)
-    hyp = math.sqrt(mean_x**2 + mean_y**2)
-    lat = math.atan2(mean_z,hyp)
-    return [math.degrees(lat),math.degrees(lng)]
+    mean_x = sum(math.cos(lat) * math.cos(lng) for lat, lng in coordinates) / points
+    mean_y = sum(math.cos(lat) * math.sin(lng) for lat, lng in coordinates) / points
+    mean_z = sum(math.sin(lat) for lat, _ in coordinates) / points
+    lng = math.atan2(mean_y, mean_x)
+    hyp = math.sqrt(mean_x ** 2 + mean_y ** 2)
+    lat = math.atan2(mean_z, hyp)
+    return [math.degrees(lat), math.degrees(lng)]
 
 class Gathering(object):
     def __init__(self):
@@ -179,7 +179,7 @@ def make_app():
         default_handler_class=NotFoundHandler,
         # Insecure because public repo
         cookie_secret=":A@[&%p<y~NQ^*e[T7ArS%(u^|TYf^1YB|cl*_$cG-U_X{5{L1&!n><mC)t8kh%.",
-        debug = True
+        debug=True
             )
 
 def main():
