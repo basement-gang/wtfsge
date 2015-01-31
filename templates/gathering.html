@@ -3,8 +3,10 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-<div id="map-canvas" style="width: 100%; height: 100%"></div>
-<button class='btn btn-default btn-lg' value="Update Location" id="update-btn"/>
+<div>
+	<div id="map-canvas" style="width: 100%; height: 90%"></div>
+	<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
+</div>
 
 <script>
 var map;
@@ -54,13 +56,19 @@ function handleNoGeolocation(errorFlag) {
 }
 
 function updateLocation() {
+	console.log("updating location.");
 	if(navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(function(position) {
-			$.post(window.location.pathname, {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			},function(gathering) {
-				renderGathering(gathering);
+			$.ajax({
+				type: "PUT",
+				url: window.location.pathname,
+				data: {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude
+				},
+				success: function(gathering) {
+					renderGathering(gathering);
+				}
 			});
 		}, function() {
 			handleNoGeolocation(true);
@@ -70,7 +78,6 @@ function updateLocation() {
 		handleNoGeolocation(false);
 	}
 }
-
 $('#update-btn').click(updateLocation);
 
 function doPoll() {
@@ -86,7 +93,10 @@ function doPoll() {
 		},
 	});
 }
-updateLocation();
+
+if (document.cookie.indexOf("friend_id") < 0) {
+	updateLocation();
+}
 doPoll();
 </script>
 

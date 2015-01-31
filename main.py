@@ -36,6 +36,13 @@ class Gathering(object):
         print self.centroid
         return friend_id
 
+    def update_friend(self, friend_id, loc):
+        self.friends[friend_id] = loc
+        self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
+
+
+
+
     def del_friend(self, id):
         if id in self.friends:
             del self.friends[id]
@@ -100,7 +107,7 @@ class GatheringHandler(RequestHandler):
             self.set_secure_cookie("friend_id", friend_id)
         self.write(g.to_dict())
 
-    def update(self, gathering_id):
+    def put(self, gathering_id):
         """Update the location of an existing friend.
         """
         gjson = self.db.get(str(gathering_id))
