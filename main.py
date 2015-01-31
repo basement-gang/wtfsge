@@ -25,13 +25,12 @@ class Gathering(object):
         self.selected_rec = None
         self.centroid = None
 
-    def add_friend(self,friend_id,loc):
+    def add_friend(self,loc):
         """
         Takes in the location of a new friend, and returns the id of the new friend
         Loc should be of type list [lat, lng]
         """
-        if friend_id == None:
-            friend_id = str(uuid.uuid4())
+        friend_id = str(uuid.uuid4())
         self.friends[friend_id] = loc
         self.centroid = centrepoint([ [float(lat),float(lng)] for lat,lng in self.friends.values() ])
         print self.centroid
