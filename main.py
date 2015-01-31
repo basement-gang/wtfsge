@@ -87,7 +87,12 @@ class GatheringHandler(RequestHandler):
         self.render("gathering.html")
 
     def post(self, gathering_id):
+        """Add a new friend.
+        """
         gjson = self.db.get(str(gathering_id))
+        if not gjson:
+            raise HTTPError(404)
+
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
         if not friend_id or (friend_id not in g.friends):
@@ -95,6 +100,22 @@ class GatheringHandler(RequestHandler):
             friend_id = g.add_friend([lat, lng])
             self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
+        self.write(g.to_dict())
+
+    def update(self, gathering_id):
+        """Update the location of an existing friend.
+        """
+        gjson = self.db.get(str(gathering_id))
+        if not gjson:
+            raise HTTPError(404)
+
+        g = Gathering.gathering_from_json(gjson)
+        friend_id = self.get_secure_cookie("friend_id")
+        if friend_id:
+            lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
+            g.update_friend(friend_id, [lat, lng])
+            self.db.put(g.id, json.dumps(g.to_dict()))
+
         self.write(g.to_dict())
 
     def on_finish(self):
