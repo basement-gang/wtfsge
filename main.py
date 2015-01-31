@@ -156,6 +156,7 @@ def make_app():
         default_handler_class=NotFoundHandler,
         # Insecure because public repo
         cookie_secret=":A@[&%p<y~NQ^*e[T7ArS%(u^|TYf^1YB|cl*_$cG-U_X{5{L1&!n><mC)t8kh%.",
+        debug = True
             )
 
 def main():
