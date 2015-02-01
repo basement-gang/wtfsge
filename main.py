@@ -2,7 +2,10 @@ import os
 import uuid
 import plyvel
 import simplejson as json
+
+from tornado import gen
 from tornado.ioloop import IOLoop
+from tornado.httpclient import AsyncHTTPClient
 from tornado.web import RequestHandler, Application, url, StaticFileHandler, HTTPError
 import math
 
@@ -75,6 +78,8 @@ class HomeHandler(BaseHandler):
 
 class GatheringNewHandler(BaseHandler):
     def post(self):
+        """Create a new Gathering
+        """
         g = Gathering()
         self.db.put(g.id, json.dumps(g.to_dict()))
 
@@ -110,6 +115,8 @@ class GatheringHandler(BaseHandler):
             self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
             print "setting cookie.."
+            fetch_recommendations(g, self.db)
+
         self.write(g.to_dict())
 
     def put(self, gathering_id):
@@ -129,6 +136,7 @@ class GatheringHandler(BaseHandler):
             print "Update location."
             print g.centroid
             self.db.put(g.id, json.dumps(g.to_dict()))
+            fetch_recommendations(g, self.db)
 
         self.write(g.to_dict())
 
@@ -138,8 +146,6 @@ class GatheringPollHandler(BaseHandler):
     etag header that matches.
     """
     def get(self, gathering_id):
-        """If the request provides an etag header, this *should* return a 304 automagically
-        if the etag headers match."""
         gjson = self.db.get(str(gathering_id))
         if not gjson:
             raise HTTPError(404)
@@ -189,8 +195,22 @@ class WTFSGEApplication(Application):
                 debug=True
         )
         Application.__init__(self, handlers, **settings)
-        # Use a global connection to leveldb.
+        # Create a global connection to leveldb.
         self.db = plyvel.DB('db', create_if_missing=True)
+
+@gen.coroutine
+def fetch_recommendations(gathering, db):
+    """Async fetch of recommendations from the Google Maps API.
+    """
+    http_client = AsyncHTTPClient()
+    lat, lng = gathering.centroid[0], gathering.centroid[1]
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBEA3Z2q4QrCx4D71VBGg-WyKt8H1CZa94&location=" + str(lat) + "," + str(lng) + "&radius=500&types=restaurant|food|cafe"
+
+    response = yield http_client.fetch(url)
+    res_json = json.loads(response.body)
+    gathering.recommendations = res_json["results"]
+
+    db.put(gathering.id, json.dumps(gathering.to_dict()))
 
 def main():
     app = WTFSGEApplication()
