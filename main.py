@@ -70,10 +70,15 @@ class BaseHandler(RequestHandler):
     def db(self):
         return self.application.db
 
-    # TODO: Add functions to override 404 and 500
+    def write_error(self, status_code, **kwargs):
+        """Use custom error pages.
+        """
+        self.render("error.html", code=status_code, message=self._reason)
 
 class HomeHandler(BaseHandler):
     def get(self):
+        """Display home page.
+        """
         self.render("main.html")
 
 class GatheringNewHandler(BaseHandler):
@@ -87,6 +92,8 @@ class GatheringNewHandler(BaseHandler):
 
 class GatheringHandler(BaseHandler):
     def get(self, gathering_id):
+        """Initial load of the gatherings page.
+        """
         gjson = self.db.get(str(gathering_id))
         if not gjson:
             raise HTTPError(404)
@@ -168,13 +175,15 @@ class FriendHandler(BaseHandler):
         self.write('')
 
 class NotFoundHandler(BaseHandler):
+    """Default 404 handler
+    """
     def prepare(self):
         self.set_status(404)
         self.render("404.html")
 
 class WTFSGEApplication(Application):
     """The main application used by this app.
-    We use a separate class because we want a global db connection.
+    We subclass Application in order to store a global DB connection
     """
     def __init__(self):
         handlers = [

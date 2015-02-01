@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block title %}{{ code }} - {{ message }}{% end %}
+
+{% block body %}
+<h1>{{ code }} - {{ message }}</h1>
+<img src="/static/cannonballcat.jpg"/>
+<h3>Pigs can fly and cats can cannonball. {% if code == 404 %}This page doesn't exist.{% elif code == 500 %}Our server exploded.{% end %} Sorry!</h3>
+{% end %}
+
