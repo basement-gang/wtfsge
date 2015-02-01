@@ -99,9 +99,6 @@ class GatheringHandler(BaseHandler):
             raise HTTPError(404)
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
-        print friend_id
-        print g.friends
-        print friend_id in g.friends
         in_gathering = "true" if friend_id in g.friends else "false"
         self.render("gathering.html", in_gathering=in_gathering)
 
@@ -118,7 +115,6 @@ class GatheringHandler(BaseHandler):
             friend_id = g.add_friend([lat, lng])
             self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
-            print "setting cookie.."
             fetch_recommendations(g, self.db)
 
         self.write(g.to_dict())
@@ -132,13 +128,9 @@ class GatheringHandler(BaseHandler):
 
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
-        print "put", friend_id
-        print "put", g.centroid
         if friend_id:
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
             g.update_friend(friend_id, [lat, lng])
-            print "Update location."
-            print g.centroid
             self.db.put(g.id, json.dumps(g.to_dict()))
             fetch_recommendations(g, self.db)
 
