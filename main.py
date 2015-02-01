@@ -60,27 +60,25 @@ class Gathering(object):
 
         return g
 
-class HomeHandler(RequestHandler):
+class BaseHandler(RequestHandler):
+    @property
+    def db(self):
+        return self.application.db
+
+    # TODO: Add functions to override 404 and 500
+
+class HomeHandler(BaseHandler):
     def get(self):
         self.render("main.html")
 
-class GatheringNewHandler(RequestHandler):
-    def initialize(self):
-        self.db = plyvel.DB('db', create_if_missing=True)
-
+class GatheringNewHandler(BaseHandler):
     def post(self):
         g = Gathering()
         self.db.put(g.id, json.dumps(g.to_dict()))
 
         self.redirect("/gatherings/" + g.id)
 
-    def on_finish(self):
-        self.db.close()
-
-class GatheringHandler(RequestHandler):
-    def initialize(self):
-        self.db = plyvel.DB('db', create_if_missing=True)
-
+class GatheringHandler(BaseHandler):
     def get(self, gathering_id):
         gjson = self.db.get(str(gathering_id))
         if not gjson:
@@ -132,17 +130,11 @@ class GatheringHandler(RequestHandler):
 
         self.write(g.to_dict())
 
-    def on_finish(self):
-        self.db.close()
-
-class GatheringPollHandler(RequestHandler):
+class GatheringPollHandler(BaseHandler):
     """Endpoint for longpolling to hit, to constantly get updated
     Gathering data. Should return 302 when provided with an If-Not-Match
     etag header that matches.
     """
-    def initialize(self):
-        self.db = plyvel.DB('db', create_if_missing=True)
-
     def get(self, gathering_id):
         """If the request provides an etag header, this *should* return a 304 automagically
         if the etag headers match."""
@@ -153,13 +145,7 @@ class GatheringPollHandler(RequestHandler):
         g = Gathering.gathering_from_json(gjson)
         self.write(g.to_dict())
 
-    def on_finish(self):
-        self.db.close()
-
-class FriendHandler(RequestHandler):
-    def initialize(self):
-        self.db = plyvel.DB('db', create_if_missing=True)
-
+class FriendHandler(BaseHandler):
     def delete(self, gathering_id, friend_id):
         """Delete a friend.
         """
@@ -173,33 +159,39 @@ class FriendHandler(RequestHandler):
         self.set_header(200)
         self.write('')
 
-    def on_finish(self):
-        self.db.close()
-
-class NotFoundHandler(RequestHandler):
+class NotFoundHandler(BaseHandler):
     def prepare(self):
         self.set_status(404)
         self.render("404.html")
 
-def make_app():
-    return Application([
-        url(r"/", HomeHandler),
-        url(r"/gatherings/", GatheringNewHandler, name="newgathering"),
-        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
-        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/data", GatheringPollHandler),
-        url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/friends/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", FriendHandler),
-        url(r"/static", StaticFileHandler)
-            ],
-        template_path=os.path.join(os.path.dirname(__file__), "templates"),
-        static_path=os.path.join(os.path.dirname(__file__), "static"),
-        default_handler_class=NotFoundHandler,
-        # Insecure because public repo
-        cookie_secret=":A@[&%p<y~NQ^*e[T7ArS%(u^|TYf^1YB|cl*_$cG-U_X{5{L1&!n><mC)t8kh%.",
-        debug=True
-            )
+class WTFSGEApplication(Application):
+    """The main application used by this app.
+    We use a separate class because we want a global db connection.
+    """
+    def __init__(self):
+        handlers = [
+                url(r"/", HomeHandler),
+                url(r"/gatherings/", GatheringNewHandler, name="newgathering"),
+                url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", GatheringHandler),
+                url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/data", GatheringPollHandler),
+                url(r"/gatherings/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})/friends/([a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})", FriendHandler),
+                url(r"/static", StaticFileHandler)
+        ]
+
+        settings = dict(
+                template_path=os.path.join(os.path.dirname(__file__), "templates"),
+                static_path=os.path.join(os.path.dirname(__file__), "static"),
+                default_handler_class=NotFoundHandler,
+                # Insecure because public repo
+                cookie_secret=":A@[&%p<y~NQ^*e[T7ArS%(u^|TYf^1YB|cl*_$cG-U_X{5{L1&!n><mC)t8kh%.",
+                debug=True
+        )
+        Application.__init__(self, handlers, **settings)
+        # Use a global connection to leveldb.
+        self.db = plyvel.DB('db', create_if_missing=True)
 
 def main():
-    app = make_app()
+    app = WTFSGEApplication()
     app.listen(4000)
     IOLoop.current().start()
 
