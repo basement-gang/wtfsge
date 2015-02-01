@@ -33,14 +33,11 @@ class Gathering(object):
         friend_id = str(uuid.uuid4())
         self.friends[friend_id] = loc
         self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
-        print self.centroid
         return friend_id
 
     def update_friend(self, friend_id, loc):
         self.friends[friend_id] = loc
         self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
-
-
 
 
     def del_friend(self, id):
@@ -88,8 +85,16 @@ class GatheringHandler(RequestHandler):
         gjson = self.db.get(str(gathering_id))
         if not gjson:
             raise HTTPError(404)
-
-        self.render("gathering.html")
+        g = Gathering.gathering_from_json(gjson)
+        friend_id = self.get_secure_cookie("friend_id")
+        print friend_id
+        print g.friends
+        print friend_id in g.friends
+        if friend_id in g.friends:
+            in_gathering = "true"
+        else:
+            in_gathering = "false"
+        self.render("gathering.html",in_gathering=in_gathering)
 
     def post(self, gathering_id):
         """Add a new friend.
@@ -97,7 +102,6 @@ class GatheringHandler(RequestHandler):
         gjson = self.db.get(str(gathering_id))
         if not gjson:
             raise HTTPError(404)
-
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
         if not friend_id or (friend_id not in g.friends):
@@ -105,6 +109,7 @@ class GatheringHandler(RequestHandler):
             friend_id = g.add_friend([lat, lng])
             self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
+            print "setting cookie.."
         self.write(g.to_dict())
 
     def put(self, gathering_id):
@@ -116,9 +121,13 @@ class GatheringHandler(RequestHandler):
 
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
+        print "put",friend_id
+        print "put",g.centroid
         if friend_id:
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
             g.update_friend(friend_id, [lat, lng])
+            print "Update location."
+            print g.centroid
             self.db.put(g.id, json.dumps(g.to_dict()))
 
         self.write(g.to_dict())
