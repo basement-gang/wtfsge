@@ -22,8 +22,14 @@ function renderGathering(gathering) {
 	var mapOptions = {
 		zoom: 100,
 	};
-	// Centre around you at the start, at 10km radius
-	var bounds = new google.maps.Circle({center: your_loc, radius: 10000}).getBounds();
+
+	var bounds = new google.maps.LatLngBounds(
+		new google.maps.LatLng(85, -180), new google.maps.LatLng(-85, 180));
+	if (your_loc !== null) {
+		// Centre around you at the start, at 10km radius
+		bounds = new google.maps.Circle({center: your_loc, radius: 10000}).getBounds();
+	}
+
 	if (!map) {
 		map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
 	}
