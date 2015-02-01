@@ -6,17 +6,6 @@ from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url, StaticFileHandler, HTTPError
 import math
 
-def centrepoint(coordinates):
-    coordinates = [map(math.radians, c) for c in coordinates]
-    points = len(coordinates)
-    mean_x = sum(math.cos(lat) * math.cos(lng) for lat, lng in coordinates) / points
-    mean_y = sum(math.cos(lat) * math.sin(lng) for lat, lng in coordinates) / points
-    mean_z = sum(math.sin(lat) for lat, _ in coordinates) / points
-    lng = math.atan2(mean_y, mean_x)
-    hyp = math.sqrt(mean_x ** 2 + mean_y ** 2)
-    lat = math.atan2(mean_z, hyp)
-    return [math.degrees(lat), math.degrees(lng)]
-
 class Gathering(object):
     def __init__(self):
         self.id = str(uuid.uuid4())
@@ -32,13 +21,12 @@ class Gathering(object):
         """
         friend_id = str(uuid.uuid4())
         self.friends[friend_id] = loc
-        self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
+        self.__update_centroid()
         return friend_id
 
     def update_friend(self, friend_id, loc):
         self.friends[friend_id] = loc
-        self.centroid = centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
-
+        self.__update_centroid()
 
     def del_friend(self, id):
         if id in self.friends:
@@ -59,6 +47,20 @@ class Gathering(object):
         g.centroid = gdict['centroid']
 
         return g
+
+    def __update_centroid(self):
+        self.centroid = self.__centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
+
+    def __centrepoint(self, coordinates):
+        coordinates = [map(math.radians, c) for c in coordinates]
+        points = len(coordinates)
+        mean_x = sum(math.cos(lat) * math.cos(lng) for lat, lng in coordinates) / points
+        mean_y = sum(math.cos(lat) * math.sin(lng) for lat, lng in coordinates) / points
+        mean_z = sum(math.sin(lat) for lat, _ in coordinates) / points
+        lng = math.atan2(mean_y, mean_x)
+        hyp = math.sqrt(mean_x ** 2 + mean_y ** 2)
+        lat = math.atan2(mean_z, hyp)
+        return [math.degrees(lat), math.degrees(lng)]
 
 class BaseHandler(RequestHandler):
     @property
@@ -92,7 +94,7 @@ class GatheringHandler(BaseHandler):
             in_gathering = "true"
         else:
             in_gathering = "false"
-        self.render("gathering.html",in_gathering=in_gathering)
+        self.render("gathering.html", in_gathering=in_gathering)
 
     def post(self, gathering_id):
         """Add a new friend.
@@ -119,8 +121,8 @@ class GatheringHandler(BaseHandler):
 
         g = Gathering.gathering_from_json(gjson)
         friend_id = self.get_secure_cookie("friend_id")
-        print "put",friend_id
-        print "put",g.centroid
+        print "put", friend_id
+        print "put", g.centroid
         if friend_id:
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
             g.update_friend(friend_id, [lat, lng])
