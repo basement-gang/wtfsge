@@ -1,13 +1,26 @@
 body {
 	padding-top: 50px;
 }
+
 .starter-template {
 	padding: 40px 15px;
-	text-align: center;
+}
+
+p {
+  size: 20px;
+}
+
+.well form {
+  margin-bottom: 0;
 }
 
 #map{
 	border: 1px dotted black;
 	text-align: center; 
 	vertical-align: middle;
+}
+
+footer {
+  border-top: 1px solid #ddd;
+  padding-top: 5px;
 }

@@ -102,10 +102,7 @@ class GatheringHandler(BaseHandler):
         print friend_id
         print g.friends
         print friend_id in g.friends
-        if friend_id in g.friends:
-            in_gathering = "true"
-        else:
-            in_gathering = "false"
+        in_gathering = "true" if friend_id in g.friends else "false"
         self.render("gathering.html", in_gathering=in_gathering)
 
     def post(self, gathering_id):

@@ -3,9 +3,31 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-<div class="starter-template">
-  <form role='form' action="{{ reverse_url('newgathering') }}" method="post">
-	<input class='btn btn-default btn-lg' type="submit" value="Gather the fuck up!" />
-  </form>
+<div class="row">
+  <div class="col-sm-4">
+    <small><em><a href="https://github.com/basement-gang">basement gang</a> presents:</em></small>
+  </div>
+</div>
+<div class="row">
+  <div class="starter-template col-sm-7 col-xs-12">
+    <h1>Where The Fuck Should Go Eat</h1>
+    <p>Have a group of friends, but don't know where to eat?</p>
+    <ol>
+      <li>Create a gathering and share the link with all your friends.</li>
+      <li>WTFSGE will save the location of each friend, and find a central location for all of you.</li>
+      <li>Pick from the list of food places around that central location.</li>
+      <li>And ... you're done!</li>
+    </ol>
+    <div class="well well-sm">
+      <form role='form' action="{{ reverse_url('newgathering') }}" method="post">
+        <input class='btn btn-danger btn-lg' type="submit" value="Gather the fuck up!" />
+      </form>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <footer class="col-xs-12">
+    Made with &hearts; in Singapore. <a href="https://github.com/basement-gang/wtfsge">Source Code</a>.
+  </footer>
 </div>
 {% end %}
