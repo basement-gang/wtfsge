@@ -213,7 +213,7 @@ def fetch_recommendations(gathering, db):
     """
     http_client = AsyncHTTPClient()
     lat, lng = gathering.centroid[0], gathering.centroid[1]
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBEA3Z2q4QrCx4D71VBGg-WyKt8H1CZa94&location=" + str(lat) + "," + str(lng) + "&radius=500&types=restaurant|food|cafe"
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyBEA3Z2q4QrCx4D71VBGg-WyKt8H1CZa94&location=" + str(lat) + "," + str(lng) + "&radius=500&types=mosque"
 
     response = yield http_client.fetch(url)
     res_json = json.loads(response.body)
