@@ -26,9 +26,13 @@ var food_markers = [];
 
 
 function appendToFoodList(recommendation) {
+	var lat = recommendation.geometry.location.lat;
+	var lng = recommendation.geometry.location.lng;
 	$('#food-list').append("<li>"+
 		"<div class='rec-name'><strong>"+recommendation.name+"</strong></div>\n" +
-		"<div>"+recommendation.vicinity+"</div>\n" +
+		"<div><a target='new' href='https://www.google.com.sg/maps/dir//" + 
+		lat + "," + lng + "/@" + lat + "," + lng + ",17z'>" + 
+		recommendation.vicinity +"</a></div>\n" +
 		"</li>");
 
 }
