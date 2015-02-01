@@ -97,7 +97,7 @@ function renderGathering(curr_loc,gathering) {
 		your_loc_marker.setMap(map);
 	}
 
-	if (recommendations && recommendations.length > 1) {
+	if (recommendations) {
 		$('#food-list').empty();
 		for (var i=0; i < food_markers.length; i++) {
 			food_markers[i].setMap(null);
