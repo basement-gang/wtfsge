@@ -50,11 +50,12 @@ function renderGathering(curr_loc,gathering) {
 	}
 	if (!bounds) {
 		if (curr_loc) {
-			bounds = new google.maps.Circle({center: curr_loc, radius: 100}).getBounds()
+			bounds = new google.maps.Circle({center: curr_loc, radius: 100}).getBounds();
 		} else {
 			bounds = new google.maps.LatLngBounds();
 		}
 	}
+	var count = 1;
 	for (var k in friends) {
 		var position = new google.maps.LatLng(friends[k][0],friends[k][1]);
 
@@ -62,11 +63,10 @@ function renderGathering(curr_loc,gathering) {
 			markers[k].setPosition(position);
 		}
 		else {
-			markers[k] = new google.maps.Marker({
-				position: position,
-				map: map
-			});
+			markers[k] = placeMarker(position, k, false, count);
 		}
+
+		count++;
 
 		bounds.extend(markers[k].position);
 	}
@@ -86,15 +86,8 @@ function renderGathering(curr_loc,gathering) {
 	}
 
 	if (your_loc !== null && your_loc_marker === null) {
-		your_loc_marker = new google.maps.Marker({
-			position: new google.maps.LatLng(your_loc.lat,your_loc.lng),
-			title: 'You',
-			icon: {
-				path: google.maps.SymbolPath.CIRCLE,
-				scale: 5
-			}
-		});
-		your_loc_marker.setMap(map);
+		your_loc_marker = placeMarker(
+			new google.maps.LatLng(your_loc.lat, your_loc.lng), 'You', true);
 	}
 
 	if (recommendations) {
@@ -122,6 +115,26 @@ function renderGathering(curr_loc,gathering) {
 
 	map.fitBounds(bounds);
 
+}
+
+function placeMarker(loc, name, is_you, num) {
+	var marker = new google.maps.Marker({
+		position: loc,
+		title: is_you ? 'You' : name,
+		icon: is_you ?
+			{
+				path: google.maps.SymbolPath.CIRCLE,
+				scale: 5
+			} : 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ num +'|FE7569'
+	});
+	marker.setMap(map);
+
+	var your_infowindow = new google.maps.InfoWindow();
+	google.maps.event.addListener(marker, 'click', function() {
+			your_infowindow.setContent(marker.title);
+			your_infowindow.open(map, this);
+		});
+	return marker;
 }
 
 function handleNoGeolocation(errorFlag) {
