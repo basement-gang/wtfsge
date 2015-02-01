@@ -3,9 +3,15 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-<div>
-	<div id="map-canvas" style="width: 100%; height: 90%"></div>
-	<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
+<div class="row">
+	<div class="col-md-6">
+		<div id="map-canvas" style="width: 100%; height: 90%"></div>
+	</div>
+	<div class="col-md-6">
+		<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
+		<ul id="food-list" style="overflow:auto;height:85%">
+		</ul>
+	</div>
 </div>
 
 <script>
@@ -16,6 +22,16 @@ var infowindow = null;
 var your_loc = null;
 var your_loc_marker = null;
 var bounds;
+var food_markers = [];
+
+
+function appendToFoodList(recommendation) {
+	$('#food-list').append("<li>"+
+		"<div class='rec-name'><strong>"+recommendation.name+"</strong></div>\n" +
+		"<div>"+recommendation.vicinity+"</div>\n" +
+		"</li>");
+
+}
 function renderGathering(curr_loc,gathering) {
 	console.log(gathering)
 	var friends = gathering.friends;
@@ -76,6 +92,30 @@ function renderGathering(curr_loc,gathering) {
 		});
 		your_loc_marker.setMap(map);
 	}
+
+	if (recommendations && recommendations.length > 1) {
+		$('#food-list').empty();
+		for (var i=0; i < food_markers.length; i++) {
+			food_markers[i].setMap(null);
+		}
+		food_markers = new Array(recommendations.length);
+		for (var i=0; i < recommendations.length; i++ ) {
+			food_markers[i] = new google.maps.Marker({
+				position: recommendations[i].geometry.location,
+				icon: new google.maps.MarkerImage(
+					recommendations[i].icon,
+					null,
+					null,
+					null,
+					new google.maps.Size(30, 30)
+				),
+				map: map
+			});
+			appendToFoodList(recommendations[i]);
+		}
+	}
+
+
 	map.fitBounds(bounds);
 
 }
