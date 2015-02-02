@@ -9,6 +9,14 @@
 	</div>
 	<div class="col-md-6">
 		<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
+		</br>
+		<div class="input-group">
+			<span class="input-group-addon" id="sizing-addon2">WTFIYN</span>
+			<input type="text" class="form-control" placeholder="wtf is your name!" id="username" size=20 aria-describedby="sizing-addon2">
+		</div>
+		<div class="text-center">
+			<input class='btn btn-default btn-lg' id="update-name" value="Name me!" />
+		</div>
 		<ul id="food-list" style="overflow:auto;height:85%">
 		</ul>
 	</div>
@@ -30,8 +38,8 @@ function appendToFoodList(recommendation) {
 	var lng = recommendation.geometry.location.lng;
 	$('#food-list').append("<li>"+
 		"<div class='rec-name'><strong>"+recommendation.name+"</strong></div>\n" +
-		"<div><a target='new' href='https://www.google.com.sg/maps/dir//" + 
-		lat + "," + lng + "/@" + lat + "," + lng + ",17z'>" + 
+		"<div><a target='new' href='https://www.google.com.sg/maps/dir//" +
+		lat + "," + lng + "/@" + lat + "," + lng + ",17z'>" +
 		recommendation.vicinity +"</a></div>\n" +
 		"</li>");
 
@@ -57,13 +65,15 @@ function renderGathering(curr_loc,gathering) {
 	}
 	var count = 1;
 	for (var k in friends) {
-		var position = new google.maps.LatLng(friends[k][0],friends[k][1]);
+		var position = new google.maps.LatLng(friends[k].lat,friends[k].lng);
 
 		if (k in markers) {
 			markers[k].setPosition(position);
+			var name = friends[k].name !== null ? friends[k].name : k;
+			markers[k].setTitle(name);
 		}
 		else {
-			markers[k] = placeMarker(position, k, false, count);
+			markers[k] = placeMarker(position, false, friends[k].name !== null ? friends[k].name : k, count);
 		}
 
 		count++;
@@ -87,7 +97,7 @@ function renderGathering(curr_loc,gathering) {
 
 	if (your_loc !== null && your_loc_marker === null) {
 		your_loc_marker = placeMarker(
-			new google.maps.LatLng(your_loc.lat, your_loc.lng), 'You', true);
+			new google.maps.LatLng(your_loc.lat, your_loc.lng), true);
 	}
 
 	if (recommendations) {
@@ -117,7 +127,7 @@ function renderGathering(curr_loc,gathering) {
 
 }
 
-function placeMarker(loc, name, is_you, num) {
+function placeMarker(loc, is_you, name, num) {
 	var marker = new google.maps.Marker({
 		position: loc,
 		title: is_you ? 'You' : name,
@@ -159,9 +169,11 @@ function getCurrentLocation(cb) {
 	}
 }
 
-function updateLocation(callback) {
+function updateLocation(callback, name) {
 	console.log("updating location.");
 	getCurrentLocation(function(loc) {
+		if (name) loc.name = name;
+		console.log(loc);
 		$.ajax({
 			type: in_gathering?"PUT":"POST",
 			url: window.location.pathname,
@@ -178,6 +190,11 @@ function updateLocation(callback) {
 }
 $('#update-btn').click(function () {
 	updateLocation();
+});
+
+$('#update-name').click(function () {
+	console.log("got clicked " + document.getElementById("username").value);
+	updateLocation(null, document.getElementById("username").value);
 });
 
 function doPoll() {

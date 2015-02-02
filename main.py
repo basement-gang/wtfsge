@@ -17,19 +17,26 @@ class Gathering(object):
         self.selected_rec = None
         self.centroid = None
 
-    def add_friend(self, loc):
+    def add_friend(self, lat, lng):
         """
         Takes in the location of a new friend, and returns the id of the new friend
-        Loc should be of type list [lat, lng]
         """
         friend_id = str(uuid.uuid4())
-        self.friends[friend_id] = loc
+        self.friends[friend_id] = {
+            'lat': lat,
+            'lng': lng,
+            'name': None
+        }
         self.__update_centroid()
         return friend_id
 
-    def update_friend(self, friend_id, loc):
-        self.friends[friend_id] = loc
+    def update_friend(self, friend_id, lat, lng):
+        self.friends[friend_id]['lat'] = lat
+        self.friends[friend_id]['lng'] = lng
         self.__update_centroid()
+
+    def update_friend_name(self, friend_id, name):
+        self.friends[friend_id]['name'] = name
 
     def del_friend(self, id):
         if id in self.friends:
@@ -52,7 +59,7 @@ class Gathering(object):
         return g
 
     def __update_centroid(self):
-        self.centroid = self.__centrepoint([[float(lat), float(lng)] for lat, lng in self.friends.values()])
+        self.centroid = self.__centrepoint([[float(f['lat']), float(f['lng'])] for f in self.friends.values()])
 
     def __centrepoint(self, coordinates):
         coordinates = [map(math.radians, c) for c in coordinates]
@@ -112,7 +119,7 @@ class GatheringHandler(BaseHandler):
         friend_id = self.get_secure_cookie("friend_id")
         if not friend_id or (friend_id not in g.friends):
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
-            friend_id = g.add_friend([lat, lng])
+            friend_id = g.add_friend(lat, lng)
             self.db.put(g.id, json.dumps(g.to_dict()))
             self.set_secure_cookie("friend_id", friend_id)
             fetch_recommendations(g, self.db)
@@ -130,7 +137,11 @@ class GatheringHandler(BaseHandler):
         friend_id = self.get_secure_cookie("friend_id")
         if friend_id:
             lat, lng = self.get_body_argument("lat"), self.get_body_argument("lng")
-            g.update_friend(friend_id, [lat, lng])
+            g.update_friend(friend_id, lat, lng)
+
+            if self.get_body_argument("name", None) :
+                g.update_friend_name(friend_id, self.get_body_argument("name"))
+
             self.db.put(g.id, json.dumps(g.to_dict()))
             fetch_recommendations(g, self.db)
 
