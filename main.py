@@ -124,6 +124,8 @@ class GatheringHandler(BaseHandler):
             self.set_secure_cookie("friend_id", friend_id)
             fetch_recommendations(g, self.db)
 
+        self.set_cookie("my_id", friend_id)
+
         self.write(g.to_dict())
 
     def put(self, gathering_id):

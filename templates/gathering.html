@@ -49,10 +49,9 @@ var in_gathering = {{in_gathering}};
 var map;
 var markers = {};
 var infowindow = null;
-var your_loc = null;
-var your_loc_marker = null;
 var bounds;
 var food_markers = [];
+var my_id = $.cookie("my_id");
 
 // main.js
 var client = new ZeroClipboard( document.getElementById("copy-button") );
@@ -102,16 +101,21 @@ function renderGathering(curr_loc,gathering) {
 	for (var k in friends) {
 		var position = new google.maps.LatLng(friends[k].lat,friends[k].lng);
 		var name = friends[k].name !== null ? friends[k].name : k;
+		var isMe = k === my_id;
 
 		if (k in markers) {
 			markers[k].setPosition(position);
 			markers[k].setTitle(name);
-		}
-		else {
-			markers[k] = placeMarker(position, false, name);
+		} else {
+			markers[k] = placeMarker(position, isMe, name);
 		}
 
 		bounds.extend(markers[k].position);
+
+		// Fill in name
+		if (isMe && friends[k].name !== null) {
+			document.getElementById("username").value = friends[k].name;
+		}
 	}
 
 	// Perhaps no friends yet.
@@ -126,11 +130,6 @@ function renderGathering(curr_loc,gathering) {
 			});
 		}
 		infowindow.setPosition(centrePos);
-	}
-
-	if (your_loc !== null && your_loc_marker === null) {
-		your_loc_marker = placeMarker(
-			new google.maps.LatLng(your_loc.lat, your_loc.lng), true);
 	}
 
 	if (recommendations) {
@@ -164,7 +163,7 @@ function placeMarker(loc, is_you, name) {
 
 	var marker = new google.maps.Marker({
 		position: loc,
-		title: is_you ? 'You' : name,
+		title: name,
 		icon: is_you ?
 		{
 			path: google.maps.SymbolPath.CIRCLE,
@@ -188,11 +187,10 @@ function getCurrentLocation(cb) {
 	if(navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(
 			function(position) {
-				your_loc = {
+				cb({
 					lat: position.coords.latitude,
 					lng: position.coords.longitude
-				};
-				cb(your_loc);
+				});
 			},
 			function() {
 				handleNoGeolocation(true);
@@ -227,7 +225,6 @@ $('#update-btn').click(function () {
 });
 
 $('#update-name').click(function () {
-	console.log("got clicked " + document.getElementById("username").value);
 	updateLocation(null, document.getElementById("username").value);
 });
 
