@@ -3,25 +3,43 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-<div class="row">
-	<div class="col-md-6">
+<nav class="navbar navbar-inverse">
+	<div>
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">Eat</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li class="active"><a href="#">Map</a></li>
+				<li><a href="#about">Friends</a></li>
+				<li><a href="#contact">Food</a></li>
+			</ul>
+		</div><!--/.nav-collapse -->
+		<div class='row col-centered'>
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="wtf is your name!" id="username">
+				<span class="input-group-btn">
+					<input class='btn btn-default btn-warning' id="update-name" value="change my fuckin name!"/>
+				</span>
+			</div><!-- /input-group -->
+		</div>
 		<div id="map-canvas" style="width: 100%; height: 90%"></div>
-	</div>
-	<div class="col-md-6">
-		<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
+
+		<div class="col-md-6">
+			<button class='btn btn-default btn-lg' style="width:100%" id="update-btn"/>Update Location</button>
 		</br>
-		<div class="input-group">
-			<span class="input-group-addon" id="sizing-addon2">WTFIYN</span>
-			<input type="text" class="form-control" placeholder="wtf is your name!" id="username" size=20 aria-describedby="sizing-addon2">
-		</div>
-		<div class="text-center">
-			<input class='btn btn-default btn-lg' id="update-name" value="Name me!" />
-		</div>
+
 		<ul id="food-list" style="overflow:auto;height:85%">
 		</ul>
 	</div>
 </div>
-
+</nav>
 <script>
 var in_gathering = {{in_gathering}};
 var map;
@@ -113,7 +131,7 @@ function renderGathering(curr_loc,gathering) {
 					null,
 					null,
 					new google.maps.Size(30, 30)
-				),
+					),
 				map: map
 			});
 			appendToFoodList(recommendations[i]);
@@ -131,18 +149,18 @@ function placeMarker(loc, is_you, name) {
 		position: loc,
 		title: is_you ? 'You' : name,
 		icon: is_you ?
-			{
-				path: google.maps.SymbolPath.CIRCLE,
-				scale: 5
-			} : 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ name.charAt(0).toUpperCase() +'|FE7569'
+		{
+			path: google.maps.SymbolPath.CIRCLE,
+			scale: 5
+		} : 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ name.charAt(0).toUpperCase() +'|FE7569'
 	});
 	marker.setMap(map);
 
 	var your_infowindow = new google.maps.InfoWindow();
 	google.maps.event.addListener(marker, 'click', function() {
-			your_infowindow.setContent(marker.title);
-			your_infowindow.open(map, this);
-		});
+		your_infowindow.setContent(marker.title);
+		your_infowindow.open(map, this);
+	});
 	return marker;
 }
 
@@ -162,7 +180,7 @@ function getCurrentLocation(cb) {
 			function() {
 				handleNoGeolocation(true);
 			}
-		);
+			);
 	} else {
 		handleNoGeolocation(true);
 	}

@@ -3,33 +3,38 @@
 {% block title %}Create Gathering{% end %}
 
 {% block body %}
-<div class="row">
-  <div class="col-sm-4">
+<!-- <a href="https://github.com/basement-gang/wtfsge">
+  <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png">
+</a> -->
+<div class="container">
+  <div id="presents">
     <small><em><a href="https://github.com/basement-gang">basement gang</a> presents:</em></small>
   </div>
-</div>
-<div class="row">
-  <div class="starter-template col-sm-7 col-xs-12">
-    <h1>Where The Fuck Should Go Eat</h1>
-    <p>Have a group of friends, but don't know where to eat?</p>
-    <ol>
-      <li>Create a gathering and share the link with all your friends.</li>
-      <li>WTFSGE will save the location of each friend, and find a central location for all of you.</li>
-      <li>Pick from the list of food places around that central location.</li>
-      <li>And ... you're done!</li>
-    </ol>
-    <div class="well well-sm">
-      <form role='form' action="{{ reverse_url('newgathering') }}" method="post">
-        <div class="text-center">
-          <input class='btn btn-danger btn-lg' type="submit" value="Gather the fuck up!" />
-        </div>
-      </form>
+  <div>
+    <div class="jumbotron text-center">
+      <h1>eat / wtf / sg</h1>
+      <p>Have a group of friends who don't know where to eat?</p>
     </div>
+    <!-- <ol>
+      <li>Create a gathering</li>
+      <li>Share the link with your friends</li>
+      <li>Everyone check in</li>
+      <li>A list of yummy places pop up</li>
+      <li>Choose a yummy place</li>
+      <li>And ... you're done!</li>
+    </ol> -->
+    <div class="text-center">
+      <p>We'll figure that for you! Blast off!</p>
+    </div>
+    <form role='form' action="{{ reverse_url('newgathering') }}" method="post">
+      <div class="text-center">
+        <input class='btn btn-lg btn-danger' type="submit" value="KA-POW!" />
+      </div>
+    </form>
+    
   </div>
 </div>
-<div class="row">
-  <footer class="col-xs-12">
-    Made with &hearts; in Singapore. <a href="https://github.com/basement-gang/wtfsge">Source Code</a>.
-  </footer>
+<div id="footer">
+  Made with &hearts; in the basement. <a href="https://github.com/basement-gang/wtfsge">Fork us \o/</a>.
 </div>
 {% end %}

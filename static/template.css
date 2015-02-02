@@ -1,17 +1,33 @@
 body {
-	padding-top: 50px;
-}
-
-.starter-template {
-	padding: 40px 15px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	background: #222222;
+	color: #eeeeee;
+	font-family: helvetica;
 }
 
 p {
-  size: 20px;
+	size: 20px;
 }
 
-.well form {
-  margin-bottom: 0;
+#presents {
+	top: 0;
+	width: 100%;
+	margin: 10;
+}
+
+.jumbotron {
+	padding:30px 15px;
+	margin-bottom:30px;
+	color: inherit;
+	background-color:#994477;
+}
+
+#footer {
+	position: fixed;
+	bottom: 0;
+	width: 100%;
+	margin: 10;
 }
 
 #map{
@@ -20,7 +36,15 @@ p {
 	vertical-align: middle;
 }
 
-footer {
-  border-top: 1px solid #ddd;
-  padding-top: 5px;
+.col-centered{
+	float: none;
+	margin: 0 auto;
+}
+
+.container {
+	max-width: 730px;
+}
+
+.container-narrow > hr {
+	margin: 30px 0;
 }
