@@ -63,20 +63,18 @@ function renderGathering(curr_loc,gathering) {
 			bounds = new google.maps.LatLngBounds();
 		}
 	}
-	var count = 1;
+
 	for (var k in friends) {
 		var position = new google.maps.LatLng(friends[k].lat,friends[k].lng);
+		var name = friends[k].name !== null ? friends[k].name : k;
 
 		if (k in markers) {
 			markers[k].setPosition(position);
-			var name = friends[k].name !== null ? friends[k].name : k;
 			markers[k].setTitle(name);
 		}
 		else {
-			markers[k] = placeMarker(position, false, friends[k].name !== null ? friends[k].name : k, count);
+			markers[k] = placeMarker(position, false, name);
 		}
-
-		count++;
 
 		bounds.extend(markers[k].position);
 	}
@@ -127,7 +125,8 @@ function renderGathering(curr_loc,gathering) {
 
 }
 
-function placeMarker(loc, is_you, name, num) {
+function placeMarker(loc, is_you, name) {
+
 	var marker = new google.maps.Marker({
 		position: loc,
 		title: is_you ? 'You' : name,
@@ -135,7 +134,7 @@ function placeMarker(loc, is_you, name, num) {
 			{
 				path: google.maps.SymbolPath.CIRCLE,
 				scale: 5
-			} : 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ num +'|FE7569'
+			} : 'http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ name.charAt(0).toUpperCase() +'|FE7569'
 	});
 	marker.setMap(map);
 
