@@ -71,6 +71,16 @@ function renderGathering(curr_loc,gathering) {
 		if (k in markers) {
 			markers[k].setPosition(position);
 			markers[k].setTitle(name);
+			if (isMe) {
+				console.log("my icon changing");
+				markers[k].setIcon({
+					path: google.maps.SymbolPath.CIRCLE,
+					scale: 5
+				});
+			} else if (markers[k].getTitle() !== name) {
+				console.log("friend changing");
+				markers[k].setIcon('http://chart.apis.google.com/chart?chst=d_map_pin_letter_withshadow&chld='+ name.charAt(0).toUpperCase() +'|FE7569');
+			}
 		} else {
 			markers[k] = placeMarker(position, isMe, name);
 		}
@@ -177,6 +187,9 @@ function updateLocation(callback, name) {
 			data: loc,
 			success: function(gathering) {
 				in_gathering = true;
+				if (gathering) {
+					renderGathering(null,gathering);
+				}
 				if (callback != null) {
 					console.log("there's a callback!");
 					callback();
